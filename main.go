@@ -1,7 +1,8 @@
 package main
 
 import (
-	"bufio"
+	// "bufio"
+	"encoding/csv"
 	"fmt"
 	"math/rand"
 	"os"
@@ -10,8 +11,6 @@ import (
 	// "strconv"
 	// "strings"
 )
-
-var reader = bufio.NewReader(os.Stdin)
 
 func checkError(err error) {
 	if err != nil {
@@ -22,7 +21,7 @@ func checkError(err error) {
 func main() {
 	fmt.Println("Hello!")
 
-	Test()
+	// Test()
 
 	CreatePassword()
 
@@ -33,7 +32,6 @@ func main() {
 
 	// fmt.Print(num)
 
-
 	// fmt.Println(num + 10)
 }
 
@@ -43,7 +41,7 @@ type PasswordParameters struct {
 }
 
 type Password struct {
-	word string
+	word        string
 	description string
 }
 
@@ -54,12 +52,12 @@ func GeneratePassword(pp PasswordParameters) string {
 	// ? Set end point for random
 	endPoint := 0
 	switch pp.passwordSecure {
-		case 1:
-			endPoint = len(arr[0])
-		case 2:
-			endPoint = len(arr[0]) + len(arr[1])
-		case 3:
-			endPoint = len(arr[0]) + len(arr[1]) + len(arr[2])
+	case 1:
+		endPoint = len(arr[0])
+	case 2:
+		endPoint = len(arr[0]) + len(arr[1])
+	case 3:
+		endPoint = len(arr[0]) + len(arr[1]) + len(arr[2])
 	}
 
 	// ? Randomly generate every char in password
@@ -87,13 +85,31 @@ func CreatePassword() {
 	password.word = passwords[0]
 	password.description = "pw description"
 
-
 	SaveLocal(password)
-
-	fmt.Println(passwords)
 }
 
-
 func SaveLocal(password Password) {
-	
+
+	// ? Open or create file
+	file, err := os.OpenFile("MyPasswords.csv", os.O_APPEND|os.O_CREATE, 0644)
+	checkError(err)
+
+	// ? Read data from file
+	reader := csv.NewReader(file)
+	data, err := reader.ReadAll()
+	checkError(err)
+	file.Close()
+
+	// ? Add new data
+	data = append(data, []string{password.word, password.description})
+
+	// ? Open file for writing
+	file, err = os.OpenFile("MyPasswords.csv", os.O_WRONLY|os.O_CREATE, 0644)
+	checkError(err)
+
+	// ? Write data to file
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+	err = writer.WriteAll(data)
+	checkError(err)
 }
