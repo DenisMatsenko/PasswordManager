@@ -1,51 +1,88 @@
 package main
 
 import (
-	// "bufio"
 	"encoding/csv"
 	"fmt"
 	"math/rand"
 	"os"
 	"strings"
-	// "strings"
-	// "strconv"
-	// "strings"
 )
+
+type GeneratorParameters struct {
+	passwordSecure int
+	passwordLength int
+	passwordsCount int 
+}
+type Password struct {
+	word        string
+	description string
+}
 
 func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
-
 func main() {
 	fmt.Println("Hello!")
 
-	// Test()
+	for {
+		fmt.Println("\n\n\nChoose option:\n 1. Generate password\n 2. Show passwords")
+		var option int
+		_, err := fmt.Scanf("%d", &option)
+		checkError(err)
 
-	CreatePassword()
-
-	// // ? Read string from console
-	// var text int
-	// _, err := fmt.Scanf("%d", &text)
-	// checkError(err)
-
-	// fmt.Print(num)
-
-	// fmt.Println(num + 10)
+		// ? Choose option
+		if(option == 1) {
+			CreatePassword()
+			break
+		} else if(option == 2) {
+			ShowPasswords()
+			break
+		} else {
+			fmt.Println("Wrong option!")
+		}
+	}
 }
 
-type PasswordParameters struct {
-	passwordSecure int
-	passwordLength int
-}
+// * Core functions
+func CreatePassword() {
+	passwordDescription := DescriptionInput()
+	passwordSecure := SecureInput()
+	passwordLength := LengthInput()
+	passwordsCount := PassvordsCountInput()
 
-type Password struct {
-	word        string
-	description string
-}
 
-func GeneratePassword(pp PasswordParameters) string {
+	// ? Init password parameters
+	gp := GeneratorParameters{passwordSecure: passwordSecure, passwordLength: passwordLength, passwordsCount: passwordsCount}
+
+	// ? Generate passwords
+	passwords := make([]string, gp.passwordsCount)
+	for index := range passwords {
+		passwords[index] = GeneratePassword(gp)
+		fmt.Print(index + 1, " ")
+		fmt.Println(passwords[index])
+	}
+
+	// ? Choose password
+	passwordNum := ChoosePasswordInput(gp)
+
+	// ? Print new password
+	fmt.Printf("\nCreated new password: %s\n", passwords[passwordNum - 1])
+
+	// ? Save new password
+	var password Password
+	password.word = passwords[passwordNum - 1]
+	password.description = passwordDescription
+	SaveLocal(password)
+}
+func ShowPasswords() {
+	// ? Get and Print data
+	for _, row := range GetDataFromFile() {
+		fmt.Println(row[0], " - ", row[1])
+	}
+}
+func GeneratePassword(pp GeneratorParameters) string {
 	// * changable password chars
 	arr := []string{"abcdefghijklmnopqrstuvwxyz", "0123456789", "!@#$%&*_+-,.?~"}
 
@@ -70,41 +107,29 @@ func GeneratePassword(pp PasswordParameters) string {
 	return password
 }
 
-func CreatePassword() {
-	// ? Init password parameters
-	pp := PasswordParameters{passwordSecure: 3, passwordLength: 20}
-	const countOfPasswords int = 5
-
-	// ? Generate passwords
-	var passwords [countOfPasswords]string
-	for index := range passwords {
-		passwords[index] = GeneratePassword(pp)
-	}
-
-	var password Password
-	password.word = passwords[0]
-	password.description = "pw description"
-
-	SaveLocal(password)
-}
-
-func SaveLocal(password Password) {
-
+// * File functions
+func GetDataFromFile() [][]string {
 	// ? Open or create file
 	file, err := os.OpenFile("MyPasswords.csv", os.O_APPEND|os.O_CREATE, 0644)
 	checkError(err)
+	defer file.Close()
 
 	// ? Read data from file
 	reader := csv.NewReader(file)
 	data, err := reader.ReadAll()
 	checkError(err)
-	file.Close()
+
+	return data
+}
+func SaveLocal(password Password) {
+	// ? Read old data
+	data := GetDataFromFile()
 
 	// ? Add new data
 	data = append(data, []string{password.word, password.description})
 
 	// ? Open file for writing
-	file, err = os.OpenFile("MyPasswords.csv", os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile("MyPasswords.csv", os.O_WRONLY|os.O_CREATE, 0644)
 	checkError(err)
 
 	// ? Write data to file
@@ -112,4 +137,89 @@ func SaveLocal(password Password) {
 	defer writer.Flush()
 	err = writer.WriteAll(data)
 	checkError(err)
+}
+
+// * Interface"" functions
+func DescriptionInput() string {
+	var passwordDescription string
+	// ? Read password description from console
+	for {
+		
+		fmt.Print("Enter password description: ")
+		_, err := fmt.Scanf("%s", &passwordDescription)
+		checkError(err)
+
+		if(len(passwordDescription) > 0) {
+			break
+		} else {
+			fmt.Println("Wrong option!")
+		}
+	}
+	return passwordDescription
+}
+func SecureInput() int {
+	var passwordSecure int
+	// ? Read password secure from console
+	for {
+		fmt.Print("Choose password secure:\n 1. Low\n 2. Medium\n 3. High\nEnter: ")
+
+		_, err := fmt.Scanf("%d", &passwordSecure)
+		checkError(err)
+
+		if(passwordSecure >= 1 && passwordSecure <= 3) {
+			break
+		} else {
+			fmt.Println("Wrong option!")
+		}
+	}
+	return passwordSecure
+}
+func LengthInput() int {
+	var passwordLength int 
+	// ? Read password length from console
+	for {
+		fmt.Print("Enter password length: ")
+		_, err := fmt.Scanf("%d", &passwordLength)
+		checkError(err)
+
+		if(passwordLength > 0) {
+			break
+		} else {
+			fmt.Println("Wrong option!")
+		}
+	}
+	return passwordLength
+}
+func PassvordsCountInput() int {
+	var passwordsCount int
+	// ? Read password count from console
+	for {
+		fmt.Print("Enter password count: ")
+		_, err := fmt.Scanf("%d", &passwordsCount)
+		checkError(err)
+
+		if(passwordsCount > 0) {
+			break
+		} else {
+			fmt.Println("Wrong option!")
+		}
+	}
+	return passwordsCount
+}
+func ChoosePasswordInput(gp GeneratorParameters) int {
+	var passwordNum int
+	// ? Choose password
+	for {
+		fmt.Print("Enter password number: ")
+		_, err := fmt.Scanf("%d", &passwordNum)
+		checkError(err)
+
+		if(passwordNum > 0 && passwordNum <= gp.passwordsCount) {
+			break
+		} else {
+			fmt.Println("Wrong option!")
+		}
+	}
+
+	return passwordNum
 }
