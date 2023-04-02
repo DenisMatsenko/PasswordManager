@@ -11,7 +11,7 @@ import (
 type GeneratorParameters struct {
 	passwordSecure int
 	passwordLength int
-	passwordsCount int 
+	passwordsCount int
 }
 type Password struct {
 	word        string
@@ -33,10 +33,10 @@ func main() {
 		checkError(err)
 
 		// ? Choose option
-		if(option == 1) {
+		if option == 1 {
 			CreatePassword()
 			break
-		} else if(option == 2) {
+		} else if option == 2 {
 			ShowPasswords()
 			break
 		} else {
@@ -52,7 +52,6 @@ func CreatePassword() {
 	passwordLength := LengthInput()
 	passwordsCount := PassvordsCountInput()
 
-
 	// ? Init password parameters
 	gp := GeneratorParameters{passwordSecure: passwordSecure, passwordLength: passwordLength, passwordsCount: passwordsCount}
 
@@ -60,7 +59,7 @@ func CreatePassword() {
 	passwords := make([]string, gp.passwordsCount)
 	for index := range passwords {
 		passwords[index] = GeneratePassword(gp)
-		fmt.Print(index + 1, " ")
+		fmt.Print(index+1, " ")
 		fmt.Println(passwords[index])
 	}
 
@@ -68,11 +67,11 @@ func CreatePassword() {
 	passwordNum := ChoosePasswordInput(gp)
 
 	// ? Print new password
-	fmt.Printf("\nCreated new password: %s\n", passwords[passwordNum - 1])
+	fmt.Printf("\nCreated new password: %s\n", passwords[passwordNum-1])
 
 	// ? Save new password
 	var password Password
-	password.word = passwords[passwordNum - 1]
+	password.word = passwords[passwordNum-1]
 	password.description = passwordDescription
 	SaveLocal(password)
 }
@@ -144,12 +143,12 @@ func DescriptionInput() string {
 	var passwordDescription string
 	// ? Read password description from console
 	for {
-		
+
 		fmt.Print("Enter password description: ")
 		_, err := fmt.Scanf("%s", &passwordDescription)
 		checkError(err)
 
-		if(len(passwordDescription) > 0) {
+		if len(passwordDescription) > 0 {
 			break
 		} else {
 			fmt.Println("Wrong option!")
@@ -166,7 +165,7 @@ func SecureInput() int {
 		_, err := fmt.Scanf("%d", &passwordSecure)
 		checkError(err)
 
-		if(passwordSecure >= 1 && passwordSecure <= 3) {
+		if passwordSecure >= 1 && passwordSecure <= 3 {
 			break
 		} else {
 			fmt.Println("Wrong option!")
@@ -175,14 +174,14 @@ func SecureInput() int {
 	return passwordSecure
 }
 func LengthInput() int {
-	var passwordLength int 
+	var passwordLength int
 	// ? Read password length from console
 	for {
 		fmt.Print("Enter password length: ")
 		_, err := fmt.Scanf("%d", &passwordLength)
 		checkError(err)
 
-		if(passwordLength > 0) {
+		if passwordLength > 0 {
 			break
 		} else {
 			fmt.Println("Wrong option!")
@@ -198,7 +197,7 @@ func PassvordsCountInput() int {
 		_, err := fmt.Scanf("%d", &passwordsCount)
 		checkError(err)
 
-		if(passwordsCount > 0) {
+		if passwordsCount > 0 {
 			break
 		} else {
 			fmt.Println("Wrong option!")
@@ -214,7 +213,7 @@ func ChoosePasswordInput(gp GeneratorParameters) int {
 		_, err := fmt.Scanf("%d", &passwordNum)
 		checkError(err)
 
-		if(passwordNum > 0 && passwordNum <= gp.passwordsCount) {
+		if passwordNum > 0 && passwordNum <= gp.passwordsCount {
 			break
 		} else {
 			fmt.Println("Wrong option!")
